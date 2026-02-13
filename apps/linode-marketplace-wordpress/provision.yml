@@ -27,6 +27,6 @@
       replace:
         path: site.yml
         regexp: "PROVISIONER-WEBSERVER-STACK"
-        replace: "{{ webserver_stack | lower }}"
+        replace: "{{ certbot_ssl_webserver_stack | lower }}"
 
 
