@@ -1,8 +1,7 @@
 ---
-name: Development Workflow
+name: Development Branch Workflow
 on:
   workflow_dispatch:
-  pull_request:
 jobs:
   static-code-analysis-shellcheck:
     name: Static code analysis - shellcheck
@@ -105,8 +104,8 @@ jobs:
       - name: Deploying ${{ matrix.app }}
         env:
           APP_NAME: ${{ matrix.app }}
-          BRANCH: ${{ github.head_ref }}
-          GIT_REPO: ${{ github.event.pull_request.head.repo.clone_url }}
+          BRANCH: ${{ github.ref_name }}
+          GIT_REPO: ${{ github.server_url }}/${{ github.repository }}.git
           GH_USER: ${{ github.repository_owner }}
           LINODE_IPV4: ${{ steps.linode-provisioning.outputs.LINODE_IPV4 }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
