@@ -2,11 +2,9 @@
 
 set -e
 
-if [[ -z "$APPS" ]]; then
-  echo "No app changes detected. Skipping Linode config search."
-  echo "configs=[]" >>"$GITHUB_OUTPUT"
-  exit 0
-fi
+APPS=$(find deployment_scripts -mindepth 1 -maxdepth 1 -type d | awk -F'/' '{print $2}' | sort -u | tr '\n' ',' | sed 's/,$//')
+
+echo "Found apps in deployment_scripts: $APPS"
 
 IFS=',' read -ra apps <<< "$APPS"
 
