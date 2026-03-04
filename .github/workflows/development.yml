@@ -58,7 +58,7 @@ jobs:
       - name: Find updated apps in pull request
         id: configs-matrix
         env:
-          BRANCH: ${{ github.head_ref }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
           TARGET: ${{ github.event.pull_request.base.ref }}
         run: bash .github/scripts/get-updated-apps.sh
   setup-job:
