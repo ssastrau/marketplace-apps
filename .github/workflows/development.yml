@@ -59,6 +59,8 @@ jobs:
       - name: Find updated apps in pull request
         id: configs-matrix
         run: bash .github/scripts/get-updated-apps.sh
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
   setup-job:
     name: Setup data for deployment and testing
     runs-on: ubuntu-latest
