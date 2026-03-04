@@ -2,12 +2,15 @@
 
 set -e
 
+echo "Current branch=$BRANCH"
+
 if [[ "$BRANCH" == "develop" ]]; then
   TARGET_BRANCH="main"
 else
   TARGET_BRANCH="develop"
 fi
 
+echo "Target branch=$TARGET_BRANCH"
 
 CHANGED_FILES=$(git diff --name-only origin/$TARGET_BRANCH)
 APPS=$(echo "$CHANGED_FILES" | awk -F'/' '/^(apps|deployment_scripts)\// {print $2}' | sort -u | tr '\n' ',' | sed 's/,$//')
