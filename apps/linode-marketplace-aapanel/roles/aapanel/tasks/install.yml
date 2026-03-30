@@ -6,15 +6,24 @@
     dest: "/tmp/install_7.0_en.sh"
     mode: '0755'
 
-- name: Wait for apt lock to be released
+- name: Wait for apt lock and background apt processes to be released
   shell: |
-    while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
-          fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
-      echo "Waiting for apt lock..."
-      sleep 5
+    timeout=$(( $(date +%s) + 900 ))
+    while [ $(date +%s) -lt $timeout ]; do
+      if ! fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 && \
+         ! fuser /var/lib/apt/lists/lock >/dev/null 2>&1 && \
+         ! fuser /var/lib/dpkg/lock >/dev/null 2>&1 && \
+         ! pgrep -x apt-get >/dev/null 2>&1 && \
+         ! pgrep -x apt >/dev/null 2>&1; then
+        echo "apt lock is free"
+        break
+      fi
+      echo "Waiting for apt lock to be released..."
+      sleep 10
     done
   args:
     executable: /bin/bash
+
 
 - name: Run aaPanel installation script
   shell: |
