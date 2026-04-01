@@ -91,7 +91,6 @@ if [ -f /etc/os-release ]; then
         dnf makecache
         dnf install epel-release -y
         dnf makecache
-        dnf install ansible -y
         }
 
     elif [ "$ID" == "rocky" ]; then
@@ -150,8 +149,7 @@ function final_run {
 
   # venv
   cd ${WORK_DIR}/${MARKETPLACE_APP}
-  pip3 install virtualenv
-  python3 -m virtualenv env
+  python3 -m venv env
   source env/bin/activate
   pip install pip --upgrade
   pip install -r requirements.txt
