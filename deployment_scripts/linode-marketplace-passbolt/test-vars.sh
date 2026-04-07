@@ -34,7 +34,7 @@ if [[ -n "${DOMAIN}" ]]; then
 elif [[ -n "${LINODE_DOMAIN}" ]]; then
         UDF_VARS["DOMAIN"]="${LINODE_DOMAIN}"
 else
-        UDF_VARS["DOMAIN"]="${DEFAULT_DNS}" # default
+        UDF_VARS["DOMAIN"]="${DEFAULT_DNS}" # default 1
 fi
 
 if [[ -n "${SUBDOMAIN}" ]]; then
