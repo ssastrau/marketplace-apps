@@ -29,19 +29,17 @@ else
         UDF_VARS["DISABLE_ROOT"]="No" # default
 fi
 
-#if [[ -n "${DOMAIN}" ]]; then
-#        UDF_VARS["DOMAIN"]="${DOMAIN}"
-#elif [[ -n "${LINODE_DOMAIN}" ]]; then
-#        UDF_VARS["DOMAIN"]="${LINODE_DOMAIN}"
-#else
-#        UDF_VARS["DOMAIN"]="${DEFAULT_DNS}" # default
-#fi
-#
-#if [[ -n "${SUBDOMAIN}" ]]; then
-#        UDF_VARS["SUBDOMAIN"]="${SUBDOMAIN}"
-#else
-#        UDF_VARS["SUBDOMAIN"]="www" # default
-#fi
+if [[ -n "${DOMAIN}" ]]; then
+        UDF_VARS["DOMAIN"]="${DOMAIN}"
+else
+        UDF_VARS["DOMAIN"]="${DEFAULT_DNS}" # default
+fi
+
+if [[ -n "${SUBDOMAIN}" ]]; then
+        UDF_VARS["SUBDOMAIN"]="${SUBDOMAIN}"
+else
+        UDF_VARS["SUBDOMAIN"]="www" # default
+fi
 
 if [[ -n "${TOKEN_PASSWORD}" ]]; then
         UDF_VARS["TOKEN_PASSWORD"]="${TOKEN_PASSWORD}"
