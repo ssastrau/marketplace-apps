@@ -5,19 +5,31 @@ set -e
 TIMEOUT=300
 ELAPSED=0
 
+PAYLOAD=$(jq -n \
+	--arg image "${IMAGE}" \
+	--arg region "${REGION}" \
+	--arg type "${LINODE_TYPE}" \
+	--arg label "github-${APP_NAME}" \
+	--arg root_pass "${LINODE_ROOT_PASS}" \
+	--argjson interfaces '[{"firewall_id":-1,"public":{}}]' \
+	'{
+		interface_generation: "linode",
+		interfaces: $interfaces,
+		image: $image,
+		maintenance_policy: "linode/migrate",
+		private_ip: false,
+		region: $region,
+		type: $type,
+		label: $label,
+		root_pass: $root_pass,
+		disk_encryption: "enabled"
+	}')
+
 RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
 	-H "Content-Type: application/json" \
 	-H "Authorization: Bearer $LINODE_API_SECRET" \
-	-X POST -d "{
-                \"image\": \"${IMAGE}\",
-                \"maintenance_policy\": \"linode/migrate\",
-                \"private_ip\": false,
-                \"region\": \"${REGION}\",
-                \"type\": \"${LINODE_TYPE}\",
-                \"label\": \"github-${APP_NAME}\",
-                \"root_pass\": \"$LINODE_ROOT_PASS\",
-                \"disk_encryption\": \"enabled\"
-            }" https://api.linode.com/v4/linode/instances)
+	-X POST -d "$PAYLOAD" \
+	https://api.linode.com/v4/linode/instances)
 
 if [ "$RESPONSE" -ne 200 ]; then
 	echo "API call failed with status code $RESPONSE"
