@@ -13,7 +13,7 @@ if [[ -n ${INSTANCE_ENV} ]]; then
   done
 fi
 
-# UDF Variables
+
 
 declare -A UDF_VARS
 
