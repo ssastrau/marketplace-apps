@@ -12,6 +12,7 @@ jobs:
   notify:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    permissions: read-all
     steps:
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v2
