@@ -9,7 +9,7 @@ This directory contains the GitHub Actions workflows and supporting scripts that
 ### 1. Development Workflow (`development.yml`)
 
 **Trigger:** 
-- Pull request creatidon or update against `target` branch (e.g. `main` or `develop`)
+- Pull request creation or update against `target` branch (e.g. `main` or `develop`)
 - Manual run for branch against `main` branch
 
 **Scope:** Compares changed files in `apps/` and `deployment_scripts/` against `target` branch. Only apps with a `deployment_scripts/<app>/linode-config.sh` are deployed.
