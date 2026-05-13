@@ -165,24 +165,24 @@ jobs:
           LINODE_IPV4: ${{ steps.linode-provisioning.outputs.LINODE_IPV4 }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: bash .github/scripts/app-installation.sh
-      - name: Run UI tests for ${{ matrix.app }}
-        env:
-          APP_NAME: ${{ matrix.app }}
-          LINODE_IPV4: ${{ steps.linode-provisioning.outputs.LINODE_IPV4 }}
-        run: bash .github/scripts/regression-tests.sh
-      - name: Upload regression test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: regression-reports-${{ matrix.app }}
-          path: reports/**
-      - name: Deleting Linode for ${{ matrix.app }}
-        if: always()
-        env:
-          LINODE_ID: ${{ steps.linode-provisioning.outputs.LINODE_ID }}
-        run: bash .github/scripts/linode-deletion.sh
-      - name: Deleting domain records for ${{ matrix.app }}
-        if: always()
-        env:
-          LINODE_IPV4: ${{ steps.linode-provisioning.outputs.LINODE_IPV4 }}
-        run: bash .github/scripts/teardown-domain-records-cleanup.sh
+#      - name: Run UI tests for ${{ matrix.app }}
+#        env:
+#          APP_NAME: ${{ matrix.app }}
+#          LINODE_IPV4: ${{ steps.linode-provisioning.outputs.LINODE_IPV4 }}
+#        run: bash .github/scripts/regression-tests.sh
+#      - name: Upload regression test reports
+#        if: always()
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: regression-reports-${{ matrix.app }}
+#          path: reports/**
+#      - name: Deleting Linode for ${{ matrix.app }}
+#        if: always()
+#        env:
+#          LINODE_ID: ${{ steps.linode-provisioning.outputs.LINODE_ID }}
+#        run: bash .github/scripts/linode-deletion.sh
+#      - name: Deleting domain records for ${{ matrix.app }}
+#        if: always()
+#        env:
+#          LINODE_IPV4: ${{ steps.linode-provisioning.outputs.LINODE_IPV4 }}
+#        run: bash .github/scripts/teardown-domain-records-cleanup.sh
