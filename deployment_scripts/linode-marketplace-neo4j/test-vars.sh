@@ -56,13 +56,13 @@ fi
 if [[ -n "${NEO4J_HTTP_ALLOW}" ]]; then
         UDF_VARS["NEO4J_HTTP_ALLOW"]="${NEO4J_HTTP_ALLOW}"
 else
-        UDF_VARS["NEO4J_HTTP_ALLOW"]="" # default
+        UDF_VARS["NEO4J_HTTP_ALLOW"]="${LINODE_IPV4}" # default
 fi
 
 if [[ -n "${NEO4J_BOLT_ALLOW}" ]]; then
         UDF_VARS["NEO4J_BOLT_ALLOW"]="${NEO4J_BOLT_ALLOW}"
 else
-        UDF_VARS["NEO4J_BOLT_ALLOW"]="" # default
+        UDF_VARS["NEO4J_BOLT_ALLOW"]="${LINODE_IPV4}" # default
 fi
 
 if [[ -n "${ADD_ONS}" ]]; then
