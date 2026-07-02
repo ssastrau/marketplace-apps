@@ -40,6 +40,7 @@ debian_deploy() {
    export APP_NAME=$APP_NAME
    export DEPLOYMENT_SCRIPT=$DEPLOYMENT_SCRIPT
    export HF_TOKEN=$HF_TOKEN
+   export LINODE_IPV4=$LINODE_IPV4
 
    sudo apt update
    sudo apt install -y git
