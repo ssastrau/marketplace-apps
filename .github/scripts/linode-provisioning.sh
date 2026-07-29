@@ -11,7 +11,7 @@ RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
 	-X POST -d "{
                 \"image\": \"${IMAGE}\",
                 \"maintenance_policy\": \"linode/migrate\",
-                \"private_ip\": false,
+                \"private_ip\": ${PRIVATE_IP:-false},
                 \"region\": \"${REGION}\",
                 \"type\": \"${LINODE_TYPE}\",
                 \"label\": \"github-${APP_NAME}\",
