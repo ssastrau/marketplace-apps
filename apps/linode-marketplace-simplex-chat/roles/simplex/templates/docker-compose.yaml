@@ -6,7 +6,7 @@ services:
     volumes:
       - /etc/opt/simplex:/etc/opt/simplex
       - /var/opt/simplex:/var/opt/simplex
-      - {{ simplex_cert_dir }}:/certificates:ro
+      - "{{ simplex_cert_dir }}:/certificates:ro"
     ports: ["5223:5223"]
     restart: unless-stopped
     environment:
