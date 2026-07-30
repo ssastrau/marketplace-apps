@@ -55,7 +55,8 @@ def _scan_host_key(host: str, port: int = 22, timeout: int = 30) -> paramiko.PKe
 
 
 @contextmanager
-def ssh_connection(host: str, username: str, password: str, timeout: int = 30):
+def ssh_connection(host: str, username: str, password: str, timeout: int = 30,
+                   look_for_keys: bool = True, allow_agent: bool = True):
     """
     Establishes and manages an SSH connection lifecycle.
 
@@ -64,6 +65,12 @@ def ssh_connection(host: str, username: str, password: str, timeout: int = 30):
         username (str): The SSH username.
         password (str): The SSH password.
         timeout (int, optional): Connection timeout in seconds. Defaults to 30.
+        look_for_keys (bool, optional): Whether to search ~/.ssh for private keys.
+            Defaults to True (paramiko's default). Pass False to force password
+            authentication, e.g. when a test must prove a password actually works.
+        allow_agent (bool, optional): Whether to use a running SSH agent.
+            Defaults to True (paramiko's default). Pass False alongside
+            look_for_keys to force password authentication.
 
     Yields:
         paramiko.SSHClient: An active, authenticated SSH client session.
@@ -77,14 +84,16 @@ def ssh_connection(host: str, username: str, password: str, timeout: int = 30):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(_StrictHostKeyPolicy(host_key))
     try:
-        client.connect(hostname=host, username=username, password=password, timeout=timeout)
+        client.connect(hostname=host, username=username, password=password, timeout=timeout,
+                       look_for_keys=look_for_keys, allow_agent=allow_agent)
         yield client
     finally:
         client.close()
 
 
 def run_remote_command(host: str, username: str, password: str, command: str,
-                       timeout: int = 30) -> tuple[str, str, int]:
+                       timeout: int = 30, look_for_keys: bool = True,
+                       allow_agent: bool = True) -> tuple[str, str, int]:
     """
     Runs a single command on the remote Linode over SSH and returns its result.
 
@@ -94,11 +103,14 @@ def run_remote_command(host: str, username: str, password: str, command: str,
         password (str): The SSH password.
         command (str): The command to execute on the VM.
         timeout (int, optional): Command/connection timeout in seconds. Defaults to 30.
+        look_for_keys (bool, optional): See ssh_connection. Defaults to True.
+        allow_agent (bool, optional): See ssh_connection. Defaults to True.
 
     Returns:
         tuple[str, str, int]: (stdout, stderr, exit_code), with stdout/stderr stripped.
     """
-    with ssh_connection(host, username, password, timeout=timeout) as client:
+    with ssh_connection(host, username, password, timeout=timeout,
+                        look_for_keys=look_for_keys, allow_agent=allow_agent) as client:
         _, stdout, stderr = client.exec_command(command, timeout=timeout)
         exit_code = stdout.channel.recv_exit_status()
         out = stdout.read().decode().strip()
