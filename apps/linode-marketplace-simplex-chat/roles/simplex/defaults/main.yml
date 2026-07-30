@@ -1,0 +1,4 @@
+---
+# Host directory holding the self-signed certificate for the smp-server web page.
+# Mounted read-only into the smp container at /certificates.
+simplex_cert_dir: /etc/opt/simplex-certs
