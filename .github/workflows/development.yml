@@ -48,57 +48,12 @@ jobs:
         run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "✅ Deployment has been approved and started to \`${{ needs.check-workflow-permissions-job.outputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
-  static-code-analysis-shellcheck:
-    name: Static code analysis - shellcheck
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    needs: approve-workflow-job
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          allow-unsafe-pr-checkout: true
-      - name: Run ShellCheck
-        run: bash .github/scripts/static-code-shellcheck.sh
-  static-code-analysis-yamllint:
-    name: Static code analysis - yamllint
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    needs: approve-workflow-job
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          allow-unsafe-pr-checkout: true
-      - name: Run yamllint
-        run: bash .github/scripts/static-code-yamllint.sh
-  static-code-analysis-ansbible-lint:
-    name: Static code analysis - ansible-lint
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    needs: approve-workflow-job
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          allow-unsafe-pr-checkout: true
-      - name: Run ansible-lint
-        run: bash .github/scripts/static-code-ansible-lint.sh
   get-updated-apps:
     name: Getting list of updated apps
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    needs:
-      - static-code-analysis-shellcheck
-      - static-code-analysis-yamllint
-      - static-code-analysis-ansbible-lint
+    needs: approve-workflow-job
     outputs:
       configs: ${{ steps.configs-matrix.outputs.configs }}
     steps:
@@ -114,32 +69,64 @@ jobs:
           BRANCH: ${{ github.head_ref || github.ref_name }}
           TARGET: ${{ github.event.pull_request.base.ref || 'main'}}
         run: bash .github/scripts/get-updated-apps.sh
-  setup-job:
-    name: Setup data for deployment and testing
+  static-code-analysis-shellcheck:
+    name: Static code analysis - shellcheck
     runs-on: ubuntu-latest
     permissions:
       contents: read
     needs: get-updated-apps
     if: needs.get-updated-apps.outputs.configs != '[]'
-    env:
-      LINODE_API_SECRET: ${{ secrets.LINODE_API_SECRET }}
-      LINODE_DOMAIN: ${{ secrets.LINODE_DOMAIN }}
-      LINODE_SUBDOMAIN: ${{ secrets.LINODE_SUBDOMAIN }}
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v7
         with:
-          fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           allow-unsafe-pr-checkout: true
-      - name: Check and clean up domain records
-        run: bash .github/scripts/setup-domain-records-cleanup.sh
-  deployment-job:
-    name: App deployment and testing
+      - name: Run ShellCheck
+        run: bash .github/scripts/static-code-shellcheck.sh
+  static-code-analysis-yamllint:
+    name: Static code analysis - yamllint
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    needs: [get-updated-apps, setup-job]
+    needs: get-updated-apps
+    if: needs.get-updated-apps.outputs.configs != '[]'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          allow-unsafe-pr-checkout: true
+      - name: Run yamllint
+        run: bash .github/scripts/static-code-yamllint.sh
+  static-code-analysis-ansbible-lint:
+    name: Static code analysis - ansible-lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: get-updated-apps
+    if: needs.get-updated-apps.outputs.configs != '[]'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          allow-unsafe-pr-checkout: true
+      - name: Run ansible-lint
+        env:
+          CONFIGS: ${{ needs.get-updated-apps.outputs.configs }}
+        run: bash .github/scripts/static-code-ansible-lint.sh
+  deployment-job:
+    name: App deployment and testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    needs:
+      - get-updated-apps
+      - static-code-analysis-shellcheck
+      - static-code-analysis-yamllint
+      - static-code-analysis-ansbible-lint
     strategy:
       fail-fast: false
       matrix:
@@ -148,8 +135,6 @@ jobs:
     env:
       LINODE_API_SECRET: ${{ secrets.LINODE_API_SECRET }}
       LINODE_ROOT_PASS: ${{ secrets.LINODE_ROOT_PASS }}
-      LINODE_DOMAIN: ${{ secrets.LINODE_DOMAIN }}
-      LINODE_SUBDOMAIN: ${{ secrets.LINODE_SUBDOMAIN }}
     steps:
       - name: Checkout branch
         uses: actions/checkout@v7
@@ -178,7 +163,7 @@ jobs:
         run: bash .github/scripts/regression-tests.sh
       - name: Upload regression test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: regression-reports-${{ matrix.app }}
           path: reports/**
@@ -187,8 +172,3 @@ jobs:
         env:
           LINODE_ID: ${{ steps.linode-provisioning.outputs.LINODE_ID }}
         run: bash .github/scripts/linode-deletion.sh
-      - name: Deleting domain records for ${{ matrix.app }}
-        if: always()
-        env:
-          LINODE_IPV4: ${{ steps.linode-provisioning.outputs.LINODE_IPV4 }}
-        run: bash .github/scripts/teardown-domain-records-cleanup.sh
