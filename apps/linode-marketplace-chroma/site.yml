@@ -1,5 +1,5 @@
 ---
-- name: Install chroma
+- name: install chromac
   hosts: localhost
   connection: local
   any_errors_fatal: true
@@ -27,3 +27,9 @@
         name: "{{ item }}"
       loop: [common, chroma, post]
       when: "mode == 'production'"
+
+    # TEMPORARY: intentional ansible-lint failure for CI testing - revert before merge
+    - name: Create lint test file
+      file:
+        path: /tmp/lint-test
+        state: touch
