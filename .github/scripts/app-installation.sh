@@ -34,7 +34,6 @@ debian_deploy() {
   "root@$LINODE_IPV4" \
   "
    export LINODE_API_SECRET=$LINODE_API_SECRET
-   export LINODE_DOMAIN=$LINODE_DOMAIN
    export GH_USER=$GH_USER
    export BRANCH=$BRANCH
    export APP_NAME=$APP_NAME
@@ -73,7 +72,6 @@ rhel_deploy() {
   "root@$LINODE_IPV4" \
   "
    export LINODE_API_SECRET=$LINODE_API_SECRET
-   export LINODE_DOMAIN=$LINODE_DOMAIN
    export GH_USER=$GH_USER
    export BRANCH=$BRANCH
    export APP_NAME=$APP_NAME

@@ -63,15 +63,11 @@ jobs:
     if: needs.get-all-apps.outputs.configs != '[]'
     env:
       LINODE_API_SECRET: ${{ secrets.LINODE_API_SECRET }}
-      LINODE_DOMAIN: ${{ secrets.LINODE_DOMAIN }}
-      LINODE_SUBDOMAIN: ${{ secrets.LINODE_SUBDOMAIN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Check and clean up domain records
-        run: bash .github/scripts/setup-domain-records-cleanup.sh
   deployment-job:
     name: App deployment and testing
     runs-on: ubuntu-latest
@@ -86,8 +82,6 @@ jobs:
     env:
       LINODE_API_SECRET: ${{ secrets.LINODE_API_SECRET }}
       LINODE_ROOT_PASS: ${{ secrets.LINODE_ROOT_PASS }}
-      LINODE_DOMAIN: ${{ secrets.LINODE_DOMAIN }}
-      LINODE_SUBDOMAIN: ${{ secrets.LINODE_SUBDOMAIN }}
     steps:
       - name: Checkout branch
         uses: actions/checkout@v7
@@ -112,11 +106,6 @@ jobs:
         env:
           LINODE_ID: ${{ steps.linode-provisioning.outputs.LINODE_ID }}
         run: bash .github/scripts/linode-deletion.sh
-      - name: Deleting domain records for ${{ matrix.app }}
-        if: always()
-        env:
-          LINODE_IPV4: ${{ steps.linode-provisioning.outputs.LINODE_IPV4 }}
-        run: bash .github/scripts/teardown-domain-records-cleanup.sh
   slack-notification:
     name: Slack Report
     runs-on: ubuntu-latest
