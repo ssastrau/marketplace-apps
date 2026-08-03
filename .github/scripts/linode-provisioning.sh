@@ -18,7 +18,7 @@ PAYLOAD=$(jq -n \
 		type: $type,
 		label: $label,
 		root_pass: $root_pass,
-		private_ip: false,
+		private_ip: (env.PRIVATE_IP == "true"),
 		maintenance_policy: "linode/migrate",
 		disk_encryption: "enabled"
 	}')
