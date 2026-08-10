@@ -16,6 +16,7 @@ services:
     environment:
       MONGODB_REPLICA_SET_MODE: primary
       MONGODB_REPLICA_SET_NAME: rs0
+      MONGODB_ADVERTISED_HOSTNAME: mongodb
       MONGODB_REPLICA_SET_KEY: {{ mongodb_replica_set_key }}
       MONGODB_ROOT_PASSWORD: {{ mongodb_root_password }}
       MONGODB_DATABASE: rocketchat

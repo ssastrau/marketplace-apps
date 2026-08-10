@@ -1,0 +1,76 @@
+---
+- name: Install Minecraft server dependencies
+  apt:
+    name:
+      - bsdmainutils
+      - lib32gcc-s1
+      - lib32stdc++6
+      - netcat-openbsd
+      - openjdk-25-jre
+      - pigz
+      - unzip
+    state: present
+    update_cache: true
+
+- name: Create linuxgsm user
+  user:
+    name: linuxgsm
+    shell: /bin/bash
+    password: "{{ linuxgsm_password | password_hash('sha512') }}"
+    update_password: on_create
+    expires: -1
+    generate_ssh_key: false
+    state: present
+  register: linuxgsm_user
+
+- name: Enable lingering for linuxgsm user
+  command: loginctl enable-linger linuxgsm
+  args:
+    creates: /var/lib/systemd/linger/linuxgsm
+
+- name: Configure user systemd environment for linuxgsm
+  lineinfile:
+    path: /home/linuxgsm/.bashrc
+    create: true
+    owner: linuxgsm
+    group: linuxgsm
+    mode: '0644'
+    line: "{{ item }}"
+  loop:
+    - "export XDG_RUNTIME_DIR=/run/user/$(id -u)"
+    - "export DBUS_SESSION_BUS_ADDRESS=unix:path=${XDG_RUNTIME_DIR}/bus"
+
+- name: Allow linuxgsm user to run apt only
+  copy:
+    dest: /etc/sudoers.d/linuxgsm
+    content: "linuxgsm ALL=(root) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get\n"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: 'visudo -cf %s'
+
+- name: Download linuxgsm script
+  uri:
+    url: https://api.github.com/repos/GameServerManagers/LinuxGSM/releases/latest
+    method: GET
+    return_content: true
+  register: linuxgsm_release
+
+- name: Set linuxgsm version from latest release
+  set_fact:
+    linuxgsm_version: "{{ linuxgsm_release.json.tag_name }}"
+
+- name: Download linuxgsm script from GitHub release
+  get_url:
+    url: "https://raw.githubusercontent.com/GameServerManagers/LinuxGSM/{{ linuxgsm_version }}/linuxgsm.sh"
+    dest: /home/linuxgsm/linuxgsm.sh
+    mode: '0755'
+  become: true
+  become_user: linuxgsm
+
+- name: Install linuxgsm
+  shell:
+    chdir: /home/linuxgsm
+    cmd: ./linuxgsm.sh
+  become: true
+  become_user: linuxgsm

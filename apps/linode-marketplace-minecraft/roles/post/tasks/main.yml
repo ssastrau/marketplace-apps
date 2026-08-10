@@ -1,0 +1,29 @@
+---
+# Install Addons if requested
+- name: Add addons
+  import_role:
+    name: addons
+  when: add_ons != ['none']
+
+# motd and creds gen
+- name: Copy MOTD template to /etc/motd
+  template:
+    src: templates/motd.j2
+    dest: /etc/motd
+    owner: '{{ username }}'
+    group: '{{ username }}'
+    mode: '0600'
+
+- name: Writing sudo creds into file
+  copy:
+    dest: /home/{{ username }}/.credentials
+    owner: '{{ username }}'
+    group: '{{ username }}'
+    mode: '0600'
+    content: |
+      Sudo Username: {{ username }}
+      Sudo Password: {{ password }}
+      LinuxGSM User: linuxgsm
+      LinuxGSM User Password: {{ linuxgsm_password }}
+      Minecraft Server Port: 25565
+      Rcon Password: {{ rconpassword }}

@@ -1,0 +1,77 @@
+---
+- name: Install mcserver script
+  shell:
+    chdir: /home/linuxgsm
+    cmd: ./linuxgsm.sh mcserver
+  become: true
+  become_user: linuxgsm
+
+- name: Install Minecraft server files
+  shell:
+    chdir: /home/linuxgsm
+    cmd: ./mcserver auto-install
+  args:
+    creates: /home/linuxgsm/serverfiles/eula.txt
+  become: true
+  become_user: linuxgsm
+
+- name: Accept Minecraft EULA
+  lineinfile:
+    path: /home/linuxgsm/serverfiles/eula.txt
+    regexp: '^eula='
+    line: 'eula=true'
+    create: true
+    owner: linuxgsm
+    group: linuxgsm
+    mode: '0644'
+
+- name: Update RCON password in server.properties
+  lineinfile:
+    path: /home/linuxgsm/serverfiles/server.properties
+    regexp: '^rcon\.password='
+    line: 'rcon.password="{{ rconpassword }}"'
+  become: true
+  become_user: linuxgsm
+
+- name: Create user systemd directory
+  file:
+    path: /home/linuxgsm/.config/systemd/user
+    state: directory
+    owner: linuxgsm
+    group: linuxgsm
+    mode: '0755'
+
+- name: Create Minecraft user systemd service
+  copy:
+    dest: /home/linuxgsm/.config/systemd/user/mcserver.service
+    owner: linuxgsm
+    group: linuxgsm
+    mode: '0644'
+    content: |
+      [Unit]
+      Description=Minecraft Server (LinuxGSM)
+      After=network.target
+
+      [Service]
+      Type=forking
+      WorkingDirectory=/home/linuxgsm
+      ExecStart=/home/linuxgsm/mcserver start
+      ExecStop=/home/linuxgsm/mcserver stop
+      ExecReload=/home/linuxgsm/mcserver restart
+      Restart=on-failure
+      RestartSec=15
+
+      [Install]
+      WantedBy=default.target
+
+- name: Enable and start Minecraft user service
+  systemd:
+    name: mcserver
+    scope: user
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+  become_user: linuxgsm
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ linuxgsm_user.uid }}"

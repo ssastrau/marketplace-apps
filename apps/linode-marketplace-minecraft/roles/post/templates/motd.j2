@@ -1,0 +1,15 @@
+*********************************************************
+Akamai Connected Cloud Minecraft Marketplace App
+Credentials File: /home/{{ username }}/.credentials
+Documentation: https://www.linode.com/marketplace/apps/linode/minecraft/
+*********************************************************
+To manage your Minecraft server:
+  Switch to the linuxgsm user: su - linuxgsm
+  Configuration File: /home/linuxgsm/serverfiles/server.properties
+  Status:   systemctl --user status mcserver
+  Start:    systemctl --user start mcserver
+  Stop:     systemctl --user stop mcserver
+  Restart:  systemctl --user restart mcserver
+  Console:  ./mcserver console
+
+To delete this message of the day: rm /etc/motd
