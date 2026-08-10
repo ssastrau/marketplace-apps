@@ -6,11 +6,12 @@ class GPTChatPage(BasePage):
     def __init__(self, page: Page):
         super().__init__(page)
 
-        self.model_selector_input = self.page.locator("#model-selector-0-button")
+        self.model_selector_input = self.page.locator("#model-selector-model-button")
         self.chat_input = self.page.locator("#chat-input")
         self.send_prompt_button = self.page.locator("#send-message-button")
-        self.edit_prompt_button = self.page.locator("button[aria-label='Edit']")
-        self.prompt_response_field = self.page.locator("#response-content-container")
+        self.edit_prompt_button = self.page.locator(
+            "button[aria-label='Edit']:not(.edit-user-message-button)").last
+        self.prompt_response_field = self.page.locator("#response-content-container").last
         self.release_notes_proceed_button = self.page.locator("//button[contains(., \"Okay, Let's Go!\")]")
 
     def hide_release_notes(self):

@@ -8,7 +8,7 @@ class GitLabNewProjectPage(BasePage):
 
         self.create_blank_project_link = self.page.locator('a[href="#blank_project"]').first
         self.project_name_input = self.page.get_by_role("textbox", name="Project name Project name")
-        self.namespace_button = self.page.get_by_role("button", name="Pick a group or namespace")
+        self.namespace_button = self.page.get_by_role("button", name="Select a group or namespace")
         self.create_project_button = self.page.get_by_role("button", name="Create project")
 
     def create_project(self, name: str):

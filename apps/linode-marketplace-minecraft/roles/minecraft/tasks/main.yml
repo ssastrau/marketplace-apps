@@ -1,0 +1,6 @@
+---
+- name: Install LinuxGSM components
+  import_tasks: linuxgsm.yml
+
+- name: Install Minecraft components
+  import_tasks: minecraft.yml

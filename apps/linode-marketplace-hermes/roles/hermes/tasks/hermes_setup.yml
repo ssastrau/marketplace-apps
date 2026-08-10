@@ -30,6 +30,8 @@
 
 - name: Install Python using uv
   command: "{{ hermes_home }}/bin/uv python install"
+  environment:
+    UV_PYTHON_INSTALL_DIR: "{{ hermes_uv_python_install_dir }}"
 
 - name: Clone hermes-agent repository
   git:
@@ -44,11 +46,15 @@
   args:
     chdir: "{{ hermes_install_dir }}"
     creates: "{{ hermes_install_dir }}/.venv/bin/python"
+  environment:
+    UV_PYTHON_INSTALL_DIR: "{{ hermes_uv_python_install_dir }}"
 
 - name: Sync uv environment with all extras
   command: "{{ hermes_home }}/bin/uv sync --extra all --locked"
   args:
     chdir: "{{ hermes_install_dir }}"
+  environment:
+    UV_PYTHON_INSTALL_DIR: "{{ hermes_uv_python_install_dir }}"
 
 - name: Install main repository Node.js dependencies
   npm:
