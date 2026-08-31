@@ -1,0 +1,38 @@
+---
+- name: Obtain a Let's Encrypt certificate
+  import_role:
+    name: certbot_ssl
+  vars:
+    webserver_stack: webroot
+    certbot_webroot: "{{ ols_docroot }}"
+
+- name: Install the certbot deploy hook
+  copy:
+    content: |
+      #!/bin/sh
+      systemctl restart {{ ols_service }}
+    dest: /etc/letsencrypt/renewal-hooks/deploy/restart-lshttpd.sh
+    mode: '0755'
+
+- name: Add the TLS listener
+  lineinfile:
+    insertafter: EOF
+    path: "{{ ols_httpd_conf }}"
+    line: |
+      listener SSL{
+        address                  *:443
+        secure                   1
+        keyFile                  /etc/letsencrypt/live/{{ _domain }}/privkey.pem
+        certFile                 /etc/letsencrypt/live/{{ _domain }}/fullchain.pem
+        map                      Example *
+      }
+  notify: Restart lshttpd
+
+- name: Update SSL path for lsws admin_config.conf
+  lineinfile:
+    path: "{{ ols_admin_conf }}"
+    line: "{{ item.line }}"
+    search_string: "{{ item.cert }}"
+  loop:
+    - { line: "  keyFile               /etc/letsencrypt/live/{{ _domain }}/privkey.pem", cert: 'webadmin.key' }
+    - { line: "  certFile              /etc/letsencrypt/live/{{ _domain }}/fullchain.pem", cert: 'webadmin.crt' }

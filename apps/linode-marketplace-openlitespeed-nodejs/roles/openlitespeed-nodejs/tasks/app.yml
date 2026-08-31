@@ -1,0 +1,43 @@
+---
+- name: Create the Node.js application directory
+  file:
+    path: "{{ ols_node_dir }}"
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: '0755'
+
+- name: Create the ACME challenge directory
+  file:
+    path: "{{ ols_docroot }}/.well-known"
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: '0755'
+
+- name: Deploy the sample Node.js application
+  copy:
+    src: app.js
+    dest: "{{ ols_node_dir }}/app.js"
+    owner: nobody
+    group: nogroup
+    mode: '0644'
+
+- name: Configure the Example virtual host
+  template:
+    src: vhconf.conf.j2
+    dest: "{{ ols_vhost_conf }}"
+    owner: lsadm
+    group: nogroup
+    mode: '0750'
+
+- name: Update config to listen on port 80
+  replace:
+    path: "{{ ols_httpd_conf }}"
+    regexp: '\*:8088'
+    replace: '*:80'
+
+- name: Restart lshttpd after listener change
+  systemd_service:
+    name: "{{ ols_service }}"
+    state: restarted

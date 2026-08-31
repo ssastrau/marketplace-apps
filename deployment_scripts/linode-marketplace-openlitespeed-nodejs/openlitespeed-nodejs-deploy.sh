@@ -1,5 +1,5 @@
 #!/bin/bash
-# STACKSCRIPT_ID: 923033
+# STACKSCRIPT_ID: 923031
 
 # enable logging
 exec > >(tee /dev/ttyS0 /var/log/stackscript.log) 2>&1
@@ -36,10 +36,6 @@ fi
 #<UDF name="domain" label="Domain" example="The domain for the DNS record: example.com (Requires API token)" default="">
 #<UDF name="soa_email_address" label="Email address (for the Let's Encrypt SSL certificate)" example="user@domain.tld">
 
-## Akaunting Settings
-#<UDF name="admin_email" label="Akaunting admin user email (used for the admin login; can be the same as the SSL email or different)" example="admin@domain.tld">
-#<UDF name="company_name" label="Company name for your Akaunting books" default="My Company">
-
 # BEGIN CI-ADDONS
 ## Addons
 #<UDF name="add_ons" label="Optional data exporter Add-ons for your deployment" manyOf="node_exporter,mysqld_exporter,newrelic,opentelemetry_collector,alloy,none" default="none">
@@ -59,7 +55,7 @@ else
 fi
 
 export WORK_DIR="/tmp/marketplace-apps"
-export MARKETPLACE_APP="apps/linode-marketplace-akaunting"
+export MARKETPLACE_APP="apps/linode-marketplace-openlitespeed-nodejs"
 
 function provision_failed {
 	echo "[info] Provision failed. Sending status.."
@@ -94,40 +90,40 @@ function udf {
 	sed 's/  //g' <<EOF >"${group_vars}"
   # sudo username
   username: ${USER_NAME}
-  # akaunting
-  company_name: ${COMPANY_NAME}
-  admin_email: ${ADMIN_EMAIL}
-  database_name: akauntingdb
-  database_user: akaunting
+  webadmin_user: admin
   # BEGIN CI-UDF-ADDONS
   # addons
   add_ons: [${ADD_ONS}]
   # END CI-UDF-ADDONS
 EOF
 
-	if [ "$DISABLE_ROOT" = "Yes" ]; then
-	echo "disable_root: yes" >> ${group_vars};
-	else echo "Leaving root login enabled";
+	# UDFs arrive as strings; ansible needs real booleans
+	if [ "${DISABLE_ROOT}" = "Yes" ]; then
+		echo "disable_root: true" >>${group_vars}
+	else
+		echo "disable_root: false" >>${group_vars}
 	fi
 
 	if [[ -n ${DOMAIN} ]]; then
-	echo "domain: ${DOMAIN}" >> ${group_vars};
+		echo "domain: ${DOMAIN}" >>${group_vars}
 	else
-	echo "default_dns: $(hostname -I | awk '{print $1}'| tr '.' '-' | awk {'print $1 ".ip.linodeusercontent.com"'})" >> ${group_vars};
+		echo "default_dns: $(hostname -I | awk '{print $1}' | tr '.' '-' | awk {'print $1 ".ip.linodeusercontent.com"'})" >>${group_vars}
 	fi
 
 	if [[ -n ${SUBDOMAIN} ]]; then
-	echo "subdomain: ${SUBDOMAIN}" >> ${group_vars};
-	else echo "subdomain: www" >> ${group_vars};
+		echo "subdomain: ${SUBDOMAIN}" >>${group_vars}
+	else
+		echo "subdomain: www" >>${group_vars}
 	fi
 
 	if [[ -n ${TOKEN_PASSWORD} ]]; then
-	echo "token_password: ${TOKEN_PASSWORD}" >> ${group_vars};
-	else echo "No API token entered";
+		echo "token_password: ${TOKEN_PASSWORD}" >>${group_vars}
+	else
+		echo "No API token entered"
 	fi
 
 	if [[ -n ${SOA_EMAIL_ADDRESS} ]]; then
-	echo "soa_email_address: ${SOA_EMAIL_ADDRESS}" >> ${group_vars};
+		echo "soa_email_address: ${SOA_EMAIL_ADDRESS}" >>${group_vars}
 	fi
 
 	# staging or production mode (ci)

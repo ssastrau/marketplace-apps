@@ -1,0 +1,8 @@
+---
+- name: Install OpenLiteSpeed and Node.js
+  apt:
+    name:
+      - openlitespeed
+      - nodejs
+    state: present
+    update_cache: true

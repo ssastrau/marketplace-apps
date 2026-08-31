@@ -1,0 +1,16 @@
+---
+- name: Create the WebAdmin credential
+  htpasswd:
+    path: "{{ ols_root }}/admin/conf/htpasswd"
+    name: "{{ webadmin_user }}"
+    password: "{{ webadmin_password }}"
+    crypt_scheme: bcrypt
+    owner: lsadm
+    group: lsadm
+    mode: '0600'
+  no_log: true
+
+- name: Remove the plaintext WebAdmin password hint file
+  file:
+    path: "{{ ols_root }}/adminpasswd"
+    state: absent

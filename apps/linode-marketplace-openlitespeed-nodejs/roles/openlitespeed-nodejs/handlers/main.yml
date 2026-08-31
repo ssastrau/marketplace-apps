@@ -1,0 +1,5 @@
+---
+- name: Restart lshttpd
+  systemd_service:
+    name: "{{ ols_service }}"
+    state: restarted
