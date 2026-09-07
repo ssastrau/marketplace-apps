@@ -51,6 +51,18 @@
   changed_when: pnpm_config_result.rc == 1
   failed_when: pnpm_config_result.rc > 1
 
+- name: Secure OpenClaw systemd user directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
+    mode: '0700'
+  loop:
+    - "{{ openclaw_home }}/.config"
+    - "{{ openclaw_home }}/.config/systemd"
+    - "{{ openclaw_home }}/.config/systemd/user"
+
 - name: Install openclaw via pnpm
   include_tasks: openclaw_install.yml
 
@@ -66,6 +78,14 @@
     owner: "{{ openclaw_user }}"
     group: "{{ openclaw_user }}"
     insertafter: EOF
+    mode: '0644'
+
+- name: Create OpenClaw gateway systemd user service
+  template:
+    src: openclaw_gateway.service.j2
+    dest: "{{ openclaw_home }}/.config/systemd/user/openclaw-gateway.service"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
     mode: '0644'
 
 - name: Add openclaw onboarding script on login

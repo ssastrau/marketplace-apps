@@ -15,9 +15,14 @@ while true; do
 
 	if [[ "$answer" =~ ^[Yy]$ ]]; then
 		echo "[***] Running onboarding as openclaw user."
-        sudo -u {{ openclaw_user }} XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" -i openclaw onboard --install-daemon
+        if sudo -u {{ openclaw_user }} XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" -i openclaw onboard \
+            && sudo -u {{ openclaw_user }} XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+                DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus" \
+                systemctl --user daemon-reload \
+            && sudo -u {{ openclaw_user }} XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+                DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus" \
+                systemctl --user enable --now openclaw-gateway.service; then
 
-		if [ $? -eq 0 ]; then
 			echo "[***] Initial onboarding complete. Removing {{ openclaw_onboarding_script }}."
 
 			if [ -f '{{ openclaw_onboarding_script }}' ]; then

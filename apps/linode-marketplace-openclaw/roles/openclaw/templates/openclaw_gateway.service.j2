@@ -1,0 +1,16 @@
+[Unit]
+Description=OpenClaw Gateway
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ openclaw_home }}
+Environment=HOME={{ openclaw_home }}
+Environment=PATH={{ openclaw_home }}/.local/bin:{{ pnpm_home }}/bin:{{ pnpm_home }}:/usr/local/bin:/usr/bin:/bin
+ExecStart={{ openclaw_home }}/.local/bin/openclaw gateway run
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
