@@ -12,19 +12,19 @@
 
 - name: installing let's encrypt certificate on subdomain provided via UDF
   shell:
-    cmd: "certbot -n --nginx --agree-tos --redirect -d {{ subdomain }}.{{ domain }} -m {{ soa_email_address }}"
+    cmd: "certbot -n --nginx --agree-tos --redirect {{ certbot_test_cert_flag }} -d {{ subdomain }}.{{ domain }} -m {{ soa_email_address }}"
   when: 
     - domain is defined
     - subdomain != 'www'
 
 - name: installing let's encrypt certificate on tld and default subdomain provided via UDF
   shell: 
-    cmd: "certbot -n --nginx --agree-tos --redirect -d {{ domain }} -d {{ subdomain }}.{{ domain }} -m {{ soa_email_address }}"
+    cmd: "certbot -n --nginx --agree-tos --redirect {{ certbot_test_cert_flag }} -d {{ domain }} -d {{ subdomain }}.{{ domain }} -m {{ soa_email_address }}"
   when:
     - domain is defined
     - subdomain == 'www'
 
 - name: installing let's encrypt certificate on default domain
   shell:
-    cmd: "certbot -n --nginx --agree-tos --redirect -d {{ default_dns }} -m {{ soa_email_address }}"
+    cmd: "certbot -n --nginx --agree-tos --redirect {{ certbot_test_cert_flag }} -d {{ default_dns }} -m {{ soa_email_address }}"
   when: default_dns is defined
