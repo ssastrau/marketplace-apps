@@ -3,6 +3,9 @@
 DEFAULT_DNS="$(hostname -I | awk '{print $1}'| tr '.' '-' | awk {'print $1 ".ip.linodeusercontent.com"'})"
 RANDOM_SUBDOMAIN="a$(tr -dc 'a-z0-9' </dev/urandom | head -c7)"
 
+# CI/CD test variables
+export CERTBOT_TEST_CERT="--test-cert"
+
 # custom env variables from cli
 if [[ -n ${INSTANCE_ENV} ]]; then
   custom_vars=(${INSTANCE_ENV})
